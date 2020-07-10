@@ -48,11 +48,6 @@ def requires_auth(f):
 
   return decorated
 
-# Controllers API
-@app.route('/')
-def home():
-    return render_template('home.html')
-
 # Here we're using the /callback route.
 @app.route('/callback')
 def callback_handling():
@@ -68,7 +63,7 @@ def callback_handling():
         'name': userinfo['name'],
         'picture': userinfo['picture']
     }
-    return redirect('/dashboard')
+    return redirect('/stream')
 
 @app.route('/login')
 def login():
@@ -87,16 +82,9 @@ def logout():
     params = {'returnTo': url_for('home', _external=True), 'client_id': AUTH0_CLIENT_ID}
     return redirect(auth0.api_base_url + '/v2/logout?' + urlencode(params))
 
-@app.route('/dashboard')
-@requires_auth
-def dashboard():
-    return render_template('dashboard.html',
-                           userinfo=session[constants.PROFILE_KEY],
-                           userinfo_pretty=json.dumps(session[constants.JWT_PAYLOAD], indent=4))
-
-#@app.route('/')
-#def home():    
-#    return redirect("/login", code=302)    
+@app.route('/')
+def home():    
+    return redirect("/login", code=302)    
 
 if __name__ == '__main__':
     app.run()
