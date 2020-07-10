@@ -92,7 +92,8 @@ html = '''
        '''
 @app.route('/')
 def home():    
-    return html
+    return redirect("/login", code=302)
+    #return html
 
 if __name__ == '__main__':
     app.run()
