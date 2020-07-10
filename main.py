@@ -75,7 +75,7 @@ def callback_handling():
         'name': userinfo['name'],
         'picture': userinfo['picture']
     }
-    return redirect('/stream')
+    return redirect('/menu')
 
 #####################################################################################################
 ### Live Stream
@@ -153,6 +153,7 @@ def play():
     return render_template('static.html')
     
 @app.route('/live')
+@requires_auth
 def live():
     t = threading.Thread(target=record, args=(32,))
     t.daemon = True
@@ -163,7 +164,6 @@ def live():
 @requires_auth
 def dashboard():
     return render_template('menu.html')
-
 
 
 @app.route('/')
