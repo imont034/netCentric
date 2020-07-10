@@ -87,4 +87,5 @@ def home():
     return redirect("/login", code=302)    
 
 if __name__ == '__main__':
+    app.secret_key = os.environ.get('KEY')
     app.run()
