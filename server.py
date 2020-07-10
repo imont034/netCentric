@@ -4,12 +4,7 @@ from functools import wraps
 from werkzeug.exceptions import HTTPException
 from dotenv import load_dotenv, find_dotenv
 
-from flask import Flask
-from flask import jsonify
-from flask import redirect
-from flask import render_template
-from flask import session
-from flask import url_for
+from flask import Flask, jsonify, redirect, render_template, session, url_for
 from authlib.integrations.flask_client import OAuth
 from six.moves.urllib.parse import urlencode
 
@@ -96,9 +91,8 @@ html = '''
 </html>
        '''
 @app.route('/')
-def home():
-    return redirect("/login", code=302)
-    #return html
+def home():    
+    return html
 
 if __name__ == '__main__':
     app.run()
