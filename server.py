@@ -17,6 +17,13 @@ AUTH0_BASE_URL = 'https://' + AUTH0_DOMAIN
 AUTH0_AUDIENCE = os.environ.get('AUTH0_AUDIENCE')
 
 app = Flask(__name__)
+
+@app.errorhandler(Exception)
+def handle_auth_error(ex):
+    response = jsonify(message=str(ex))
+    response.status_code = (ex.code if isinstance(ex, HTTPException) else 500)
+    return response
+
 oauth = OAuth(app)
 
 auth0 = oauth.register(
@@ -24,12 +31,28 @@ auth0 = oauth.register(
     client_id=AUTH0_CLIENT_ID,
     client_secret=AUTH0_CLIENT_SECRET,
     api_base_url=AUTH0_BASE_URL,
-    access_token_url='https://' + AUTH0_DOMAIN + ' /oauth/token',
-    authorize_url='https://' + AUTH0_DOMAIN + '/authorize',
+    access_token_url=AUTH0_BASE_URL + '/oauth/token',
+    authorize_url=AUTH0_BASE_URL + '/authorize',
     client_kwargs={
         'scope': 'openid profile email',
     },
 )
+
+def requires_auth(f):
+  @wraps(f)
+  def decorated(*args, **kwargs):
+    if 'profile' not in session:
+      # Redirect to Login page here
+      return redirect('/')
+    return f(*args, **kwargs)
+
+  return decorated
+
+# Controllers API
+@app.route('/')
+def home():
+    return render_template('home.html')
+
 # Here we're using the /callback route.
 @app.route('/callback')
 def callback_handling():
@@ -45,21 +68,11 @@ def callback_handling():
         'name': userinfo['name'],
         'picture': userinfo['picture']
     }
-    return redirect('/stream')
+    return redirect('/dashboard')
 
 @app.route('/login')
 def login():
-    return auth0.authorize_redirect(redirect_uri=AUTH0_CALLBACK_URL)
-
-def requires_auth(f):
-  @wraps(f)
-  def decorated(*args, **kwargs):
-    if 'profile' not in session:
-      # Redirect to Login page here
-      return redirect('/')
-    return f(*args, **kwargs)
-
-  return decorated
+    return auth0.authorize_redirect(redirect_uri=AUTH0_CALLBACK_URL, audience=AUTH0_AUDIENCE)
 
 @app.route('/stream')
 @requires_auth
@@ -74,9 +87,16 @@ def logout():
     params = {'returnTo': url_for('home', _external=True), 'client_id': AUTH0_CLIENT_ID}
     return redirect(auth0.api_base_url + '/v2/logout?' + urlencode(params))
 
-@app.route('/')
-def home():    
-    return redirect("/login", code=302)    
+@app.route('/dashboard')
+@requires_auth
+def dashboard():
+    return render_template('dashboard.html',
+                           userinfo=session[constants.PROFILE_KEY],
+                           userinfo_pretty=json.dumps(session[constants.JWT_PAYLOAD], indent=4))
+
+#@app.route('/')
+#def home():    
+#    return redirect("/login", code=302)    
 
 if __name__ == '__main__':
     app.run()
