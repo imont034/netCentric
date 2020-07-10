@@ -17,6 +17,7 @@ AUTH0_BASE_URL = 'https://' + AUTH0_DOMAIN
 AUTH0_AUDIENCE = os.environ.get('AUTH0_AUDIENCE')
 
 app = Flask(__name__)
+app.secret_key = os.environ.get('KEY')
 
 @app.errorhandler(Exception)
 def handle_auth_error(ex):
@@ -86,6 +87,5 @@ def logout():
 def home():    
     return redirect("/login", code=302)    
 
-if __name__ == '__main__':
-    app.secret_key = os.environ.get('KEY')
+if __name__ == '__main__':    
     app.run()
