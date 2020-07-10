@@ -30,7 +30,6 @@ auth0 = oauth.register(
         'scope': 'openid profile email',
     },
 )
-
 # Here we're using the /callback route.
 @app.route('/callback')
 def callback_handling():
@@ -46,7 +45,7 @@ def callback_handling():
         'name': userinfo['name'],
         'picture': userinfo['picture']
     }
-    return redirect('/dashboard')
+    return redirect('/stream')
 
 @app.route('/login')
 def login():
@@ -62,10 +61,10 @@ def requires_auth(f):
 
   return decorated
 
-@app.route('/dashboard')
+@app.route('/stream')
 @requires_auth
 def dashboard():
-    return render_template('dashboard.html',
+    return render_template('stream.html',
                            userinfo=session['profile'],
                            userinfo_pretty=json.dumps(session['jwt_payload'], indent=4))
 
@@ -77,23 +76,9 @@ def logout():
     params = {'returnTo': url_for('home', _external=True), 'client_id': AUTH0_CLIENT_ID}
     return redirect(auth0.api_base_url + '/v2/logout?' + urlencode(params))
 
-
-html = '''
-<html>
-    <head>
-        <title>Test</title>
-    </head>
-    <body>
-        <div>
-            <p>ABC</p>
-        </div>
-    </body>
-</html>
-       '''
 @app.route('/')
 def home():    
-    return redirect("/login", code=302)
-    #return html
+    return redirect("/login", code=302)    
 
 if __name__ == '__main__':
     app.run()
