@@ -55,7 +55,7 @@ def callback_handling():
 
 @app.route('/login')
 def login():
-    return auth0.authorize_redirect(redirect_uri='YOUR_CALLBACK_URL')
+    return auth0.authorize_redirect(redirect_uri=AUTH0_CALLBACK_URL)
 
 def requires_auth(f):
   @wraps(f)
@@ -79,7 +79,7 @@ def logout():
     # Clear session stored data
     session.clear()
     # Redirect user to logout endpoint
-    params = {'returnTo': url_for('home', _external=True), 'client_id': 'YOUR_CLIENT_ID'}
+    params = {'returnTo': url_for('home', _external=True), 'client_id': AUTH0_CLIENT_ID}
     return redirect(auth0.api_base_url + '/v2/logout?' + urlencode(params))
 
 
@@ -97,7 +97,8 @@ html = '''
        '''
 @app.route('/')
 def home():
-    return html
+    return redirect("/login", code=302)
+    #return html
 
 if __name__ == '__main__':
     app.run()
