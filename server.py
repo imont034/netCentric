@@ -64,9 +64,7 @@ def requires_auth(f):
 @app.route('/stream')
 @requires_auth
 def dashboard():
-    return render_template('stream.html',
-                           userinfo=session['profile'],
-                           userinfo_pretty=json.dumps(session['jwt_payload'], indent=4))
+    return render_template('stream.html')
 
 @app.route('/logout')
 def logout():
